@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AnimGram - Eng yangilari tepada</title>
+    <title>AnimGram - Professional Scoped Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     
@@ -23,7 +22,7 @@
         .ag-logo { width: 90px; height: 90px; background: var(--accent); border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 35px; font-weight: 900; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); opacity: 0.8; } }
 
-        /* Auth */
+        /* Auth Page */
         #authPage { position: fixed; inset: 0; background: #000; z-index: 9000; display: none; align-items: center; justify-content: center; padding: 25px; }
         .modal-card { width: 100%; max-width: 360px; background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid var(--border); backdrop-filter: var(--glass); text-align: center; }
         input, textarea { width: 100%; background: #1c1c1e; border: 1px solid var(--border); padding: 15px; border-radius: 15px; color: #fff; margin-bottom: 12px; }
@@ -40,12 +39,14 @@
         .post-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
         .avatar-sm { width: 32px; height: 32px; border-radius: 10px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
         
-        .content-box { width: 100%; aspect-ratio: 1/1; background: #050505; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor: pointer; }
+        /* Muhim: Animatsiya sig'adigan konteyner */
+        .content-box { width: 100%; aspect-ratio: 1/1; background: #050505; position: relative; overflow: hidden; cursor: pointer; display: block; }
+        
         .post-footer { padding: 12px 15px; }
         .btns { display: flex; gap: 20px; font-size: 22px; margin-bottom: 8px; }
         .fa-heart.active { color: #ff3b30; }
 
-        /* Nav Bar */
+        /* Navigation */
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(28, 28, 30, 0.8); backdrop-filter: var(--glass); display: flex; justify-content: space-around; padding: 15px 10px 35px; border-top: 1px solid var(--border); }
         .nav-item { font-size: 24px; color: var(--sub); cursor: pointer; transition: 0.2s; }
         .nav-item.active { color: #fff; }
@@ -86,12 +87,10 @@
             <div id="tab-reels" class="tab active">
                 <div id="feed"></div>
             </div>
-
             <div id="tab-history" class="tab">
                 <h3 style="padding:20px">Tarix</h3>
                 <div id="historyList"></div>
             </div>
-
             <div id="tab-profile" class="tab">
                 <div class="modal-card" style="margin: 50px auto;">
                     <div id="uAvatar" style="width:70px; height:70px; background:var(--accent); border-radius:20px; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:bold;">?</div>
@@ -124,7 +123,7 @@
         <div class="modal-card">
             <h3>Yangi Post</h3>
             <input type="text" id="pName" placeholder="Nomi">
-            <textarea id="pCode" rows="5" placeholder="HTML/CSS kod"></textarea>
+            <textarea id="pCode" rows="10" placeholder="HTML/CSS kodingizni bu yerga to'liq (DOCTYPE-siz) joylang"></textarea>
             <button class="btn" id="publishBtn"><i class="fas fa-paper-plane"></i></button>
             <button class="btn" style="background:none; color:var(--sub)" id="closeAddBtn"><i class="fas fa-times"></i></button>
         </div>
@@ -180,18 +179,22 @@
         document.getElementById('switchBtn').innerText = loginMode ? "Ro'yxatdan o'tish" : "Kirish rejimi";
     };
 
-    document.querySelectorAll('.nav-item[data-tab]').forEach(item => {
-        item.onclick = () => {
-            const target = item.getAttribute('data-tab');
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(target).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            item.classList.add('active');
-            if(target === 'tab-history') renderHistory();
-        };
-    });
+    // Scoped CSS funksiyasi: post kodini o'rab turadi
+    function scopeAnimationCode(postId, rawCode) {
+        // 1. Style teglari ichidagi selektorlarni postId ga bog'lash
+        let scoped = rawCode.replace(/<style>([\s\S]*?)<\/style>/gi, (match, css) => {
+            const scopedCss = css.replace(/([^\r\n,{}]+)(?=[^{}]*{)/g, (selector) => {
+                const s = selector.trim();
+                // Keyframes va media so'rovlarni o'tkazib yuboramiz
+                if (s.startsWith('@') || s.startsWith('from') || s.startsWith('to') || !isNaN(s[0])) return s;
+                // Selektorni postId konteyneriga bog'laymiz
+                return `#${postId} ${s}`;
+            });
+            return `<style>${scopedCss}</style>`;
+        });
+        return scoped;
+    }
 
-    // TO'LIQ YANGILANGAN LOAD FEED: Eskilari o'chmaydi, yangilari tepada
     async function loadFeed() {
         onSnapshot(collection(db, "animations"), async (snap) => {
             const feed = document.getElementById('feed');
@@ -201,19 +204,19 @@
                 allPosts.push({id: d.id, ...d.data()});
             });
 
-            // Saralash: Eng yangisi tepada
-            allPosts.sort((a, b) => {
-                const tA = a.time?.toMillis ? a.time.toMillis() : Date.now();
-                const tB = b.time?.toMillis ? b.time.toMillis() : Date.now();
-                return tB - tA;
-            });
+            allPosts.sort((a, b) => (b.time?.toMillis?.() || Date.now()) - (a.time?.toMillis?.() || Date.now()));
 
             feed.innerHTML = allPosts.length ? "" : "<p style='text-align:center;padding:50px;opacity:0.5'>Hali postlar yo'q</p>";
 
             for(let p of allPosts) {
                 const liked = me ? (await getDoc(doc(db, "likes", `${me.uid}_${p.id}`))).exists() : false;
+                const postId = "scope_" + p.id; // Har bir post uchun noyob ID
                 const card = document.createElement('div');
                 card.className = 'post-card';
+                
+                // Animatsiya kodini "qamoqqa" olamiz
+                const safeContent = scopeAnimationCode(postId, p.code);
+
                 card.innerHTML = `
                     <div class="post-header">
                         <div style="display:flex;align-items:center;gap:10px">
@@ -222,7 +225,7 @@
                         </div>
                         ${me?.email === ADM ? `<i class="fas fa-trash-alt del-btn" style="color:#ff3b30; cursor:pointer"></i>` : ''}
                     </div>
-                    <div class="content-box">${p.code}</div>
+                    <div class="content-box" id="${postId}">${safeContent}</div>
                     <div class="post-footer">
                         <div class="btns">
                             <i class="fa-${liked?'solid':'regular'} fa-heart like-btn ${liked?'active':''}"></i>
@@ -231,7 +234,17 @@
                         <b style="font-size:13px" class="likes-count">${p.likes||0} likes</b>
                     </div>`;
 
-                card.querySelector('.content-box').onclick = () => openCode(p.id, p.name, p.code);
+                // Scriptlarni qayta ishga tushirish (agar kodingizda JS bo'lsa)
+                const scripts = card.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    newScript.textContent = `(function(){ const container = document.getElementById('${postId}'); ${oldScript.textContent} })();`;
+                    document.body.appendChild(newScript).parentNode.removeChild(newScript);
+                });
+
+                card.querySelector('.content-box').onclick = (e) => {
+                    if(e.target.closest('.content-box')) openCode(p.id, p.name, p.code);
+                };
                 card.querySelector('.like-btn').onclick = (e) => toggleLike(p.id, e.target);
                 if(card.querySelector('.del-btn')) {
                     card.querySelector('.del-btn').onclick = () => deletePost(p.id);
@@ -259,27 +272,8 @@
         document.getElementById('codeBox').textContent = code;
         Prism.highlightElement(document.getElementById('codeBox'));
         document.getElementById('codeModal').style.display = 'flex';
-        
-        let h = JSON.parse(localStorage.getItem('ag_hist') || '[]');
-        if(!h.find(x => x.id === id)) { 
-            h.unshift({id, title, code}); 
-            localStorage.setItem('ag_hist', JSON.stringify(h.slice(0,20))); 
-        }
     }
 
-    function renderHistory() {
-        const l = document.getElementById('historyList'), h = JSON.parse(localStorage.getItem('ag_hist') || '[]');
-        l.innerHTML = h.length ? "" : "<p style='text-align:center;opacity:0.5'>Tarix bo'sh</p>";
-        h.forEach(i => {
-            const d = document.createElement('div'); d.className = 'h-item';
-            d.innerHTML = `<div style="width:35px;height:35px;background:#111;border-radius:5px;overflow:hidden;transform:scale(0.8)">${i.code}</div> <b>${i.title}</b>`;
-            d.onclick = () => openCode(i.id, i.title, i.code);
-            l.appendChild(d);
-        });
-    }
-
-    async function deletePost(id) { if(confirm("Butunlay o'chirilsinmi?")) await deleteDoc(doc(db, "animations", id)); }
-    
     document.getElementById('publishBtn').onclick = async () => {
         const n = document.getElementById('pName').value, c = document.getElementById('pCode').value;
         if(!n || !c) return;
@@ -292,6 +286,16 @@
         document.getElementById('pName').value = '';
         document.getElementById('pCode').value = '';
     };
+
+    document.querySelectorAll('.nav-item[data-tab]').forEach(item => {
+        item.onclick = () => {
+            const target = item.getAttribute('data-tab');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(target).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+        };
+    });
 
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
     document.getElementById('addBtn').onclick = () => document.getElementById('addModal').style.display = 'flex';
