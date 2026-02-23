@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AnimGram - Pro Edition</title>
+    <title>AnimGram - Community Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
@@ -22,17 +21,16 @@
 
         #authPage { position: fixed; inset: 0; background: #000; z-index: 9000; display: none; align-items: center; justify-content: center; padding: 25px; }
         .modal-card { width: 100%; max-width: 360px; background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid var(--border); backdrop-filter: var(--glass); text-align: center; }
-        input, textarea { width: 100%; background: #1c1c1e; border: 1px solid var(--border); padding: 15px; border-radius: 15px; color: #fff; margin-bottom: 12px; }
+        input, textarea { width: 100%; background: #1c1c1e; border: 1px solid var(--border); padding: 12px; border-radius: 12px; color: #fff; margin-bottom: 10px; }
         .btn { width: 100%; padding: 15px; border-radius: 15px; border: none; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; transition: 0.3s; }
 
         .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; }
         .header { padding: 60px 20px 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.8); backdrop-filter: var(--glass); z-index: 100; }
-        .logo-text { font-size: 24px; font-weight: 800; }
-
+        
         #mainArea { flex: 1; overflow-y: auto; padding-bottom: 100px; }
         .post-card { background: var(--card); border-radius: 25px; border: 1px solid var(--border); margin: 15px; overflow: hidden; backdrop-filter: var(--glass); }
         .post-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
-        .avatar-sm { width: 32px; height: 32px; border-radius: 10px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+        .avatar-sm { width: 32px; height: 32px; border-radius: 10px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; }
         .content-box { width: 100%; aspect-ratio: 1/1; background: #050505; position: relative; overflow: hidden; }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(28, 28, 30, 0.8); backdrop-filter: var(--glass); display: flex; justify-content: space-around; padding: 15px 10px 35px; border-top: 1px solid var(--border); }
@@ -45,6 +43,10 @@
         .tab { display: none; }
         .tab.active { display: block; }
         .h-item { display: flex; align-items: center; gap: 15px; padding: 12px; background: var(--card); border-radius: 15px; margin: 10px; border: 1px solid var(--border); cursor: pointer; }
+        
+        /* Comment styling */
+        .comment-box { font-size: 13px; margin-bottom: 5px; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -63,12 +65,12 @@
 
     <div class="app-shell">
         <div class="header">
-            <div class="logo-text">AnimGram</div>
+            <div style="font-size:24px; font-weight:800">AnimGram</div>
             <div id="admBadge" style="display:none; color:#ff3b30;"><i class="fas fa-shield-alt"></i></div>
         </div>
         <div id="mainArea">
             <div id="tab-reels" class="tab active"><div id="feed"></div></div>
-            <div id="tab-history" class="tab"><h3 style="padding:20px">Tarix (Cloud)</h3><div id="historyList"></div></div>
+            <div id="tab-history" class="tab"><h3 style="padding:20px">Tarix</h3><div id="historyList"></div></div>
             <div id="tab-profile" class="tab">
                 <div class="modal-card" style="margin: 50px auto;">
                     <div id="uAvatar" style="width:70px; height:70px; background:var(--accent); border-radius:20px; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:28px;">?</div>
@@ -88,7 +90,7 @@
     <div id="codeModal">
         <div class="code-header">
             <i class="fas fa-chevron-left" id="closeCodeBtn" style="font-size:24px; color:var(--accent); cursor:pointer"></i>
-            <b id="codeTitle">SOURCE</b>
+            <b>SOURCE</b>
             <div style="width:24px"></div>
         </div>
         <div style="flex:1; overflow:auto; padding:15px;"><pre><code id="codeBox" class="language-html"></code></pre></div>
@@ -98,7 +100,7 @@
         <div class="modal-card">
             <h3>Yangi Post</h3>
             <input type="text" id="pName" placeholder="Nomi">
-            <textarea id="pCode" rows="8" placeholder="Kodni kiriting"></textarea>
+            <textarea id="pCode" rows="8" placeholder="HTML/CSS kod"></textarea>
             <button class="btn" id="publishBtn">PUBLISH</button>
             <button class="btn" style="background:none;" id="closeAddBtn">Yopish</button>
         </div>
@@ -108,7 +110,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, getDoc, setDoc, updateDoc, increment, serverTimestamp, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, getDoc, setDoc, updateDoc, increment, serverTimestamp, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = { 
         apiKey: "AIzaSyBqrgTztsCMFP99ZrIyOMAeqV-EiKB7wBE", 
@@ -124,6 +126,17 @@
     let loginMode = true;
     const ADM = "admin@gmail.com";
 
+    // --- Global Functions ---
+    window.sendComment = async (postId) => {
+        const input = document.getElementById(`cm_input_${postId}`);
+        const text = input.value.trim();
+        if(!text || !me) return;
+        await addDoc(collection(db, "animations", postId, "comments"), {
+            uid: me.uid, user: me.email.split('@')[0], text: text, time: serverTimestamp()
+        });
+        input.value = "";
+    };
+
     onAuthStateChanged(auth, u => {
         me = u;
         document.getElementById('splash').style.display = 'none';
@@ -138,7 +151,6 @@
         }
     });
 
-    // Scoped CSS (ID orqali izolyatsiya)
     function scopeCSS(id, code) {
         return code.replace(/<style>([\s\S]*?)<\/style>/gi, (m, css) => {
             const scoped = css.replace(/([^\r\n,{}]+)(?=[^{}]*{)/g, s => {
@@ -146,6 +158,20 @@
                 return `#${id} ${s.trim()}`;
             });
             return `<style>${scoped}</style>`;
+        });
+    }
+
+    function listenComments(postId, container) {
+        const q = query(collection(db, "animations", postId, "comments"), orderBy("time", "asc"));
+        onSnapshot(q, snap => {
+            container.innerHTML = "";
+            snap.forEach(d => {
+                const c = d.data();
+                const div = document.createElement('div');
+                div.className = 'comment-box';
+                div.innerHTML = `<b style="color:var(--accent)">${c.user}:</b> ${c.text}`;
+                container.appendChild(div);
+            });
         });
     }
 
@@ -166,66 +192,56 @@
                 card.innerHTML = `
                     <div class="post-header">
                         <div style="display:flex;align-items:center;gap:10px">
-                            <div class="avatar-sm">${p.user[0].toUpperCase()}</div><b>${p.user}</b>
+                            <div class="avatar-sm">${(p.user||'U')[0].toUpperCase()}</div><b>${p.user||'User'}</b>
                         </div>
-                        ${me?.email === ADM ? `<i class="fas fa-trash-alt del-post" data-id="${p.id}" style="color:#ff3b30;cursor:pointer"></i>` : ''}
+                        ${me?.email === ADM ? `<i class="fas fa-trash-alt del-post" style="color:#ff3b30;cursor:pointer"></i>` : ''}
                     </div>
                     <div class="content-box" id="${sid}">${scopeCSS(sid, p.code)}</div>
                     <div class="post-footer">
                         <div class="btns">
-                            <i class="fa-${liked?'solid':'regular'} fa-heart like-btn ${liked?'active':''}" data-id="${p.id}"></i>
+                            <i class="fa-${liked?'solid':'regular'} fa-heart like-btn ${liked?'active':''}"></i>
                             <i class="far fa-comment"></i>
                         </div>
                         <b style="font-size:12px">${p.likes||0} likes</b>
+                        <div id="cm_list_${p.id}" style="max-height:100px; overflow-y:auto; margin:10px 0; border-top:1px solid var(--border); padding-top:10px;"></div>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" id="cm_input_${p.id}" placeholder="Izoh..." style="margin:0; flex:1; padding:10px;">
+                            <button class="btn" style="width:auto; padding:0 15px;" onclick="sendComment('${p.id}')"><i class="fas fa-paper-plane"></i></button>
+                        </div>
                     </div>`;
 
-                // Event Listeners (To'g'ridan-to'g'ri biriktirish)
                 card.querySelector('.content-box').onclick = () => addToHistoryAndOpen(p);
                 card.querySelector('.like-btn').onclick = (e) => toggleLike(p.id, e.target);
                 if(me?.email === ADM) {
-                    card.querySelector('.del-post').onclick = (e) => {
-                        e.stopPropagation();
-                        if(confirm("O'chirilsinmi?")) deleteDoc(doc(db, "animations", p.id));
-                    };
+                    card.querySelector('.del-post').onclick = () => confirm("O'chirish?") && deleteDoc(doc(db, "animations", p.id));
                 }
                 feed.appendChild(card);
+                listenComments(p.id, card.querySelector(`#cm_list_${p.id}`));
             }
         });
     }
 
     async function addToHistoryAndOpen(p) {
-        if(me) {
-            await setDoc(doc(db, "users", me.uid, "history", p.id), {
-                title: p.name,
-                code: p.code,
-                time: serverTimestamp()
-            });
-        }
-        openCode(p.name, p.code);
+        if(me) await setDoc(doc(db, "users", me.uid, "history", p.id), { title: p.name, code: p.code, time: serverTimestamp() });
+        document.getElementById('codeBox').textContent = p.code;
+        Prism.highlightElement(document.getElementById('codeBox'));
+        document.getElementById('codeModal').style.display = 'flex';
     }
 
     async function renderHistory() {
-        if(!me) return;
-        const qH = query(collection(db, "users", me.uid, "history"), orderBy("time", "desc"), limit(20));
-        onSnapshot(qH, snap => {
+        const q = query(collection(db, "users", me.uid, "history"), orderBy("time", "desc"), limit(20));
+        onSnapshot(q, snap => {
             const list = document.getElementById('historyList');
             list.innerHTML = "";
             snap.forEach(d => {
-                const item = d.data();
+                const h = d.data();
                 const div = document.createElement('div');
                 div.className = 'h-item';
-                div.innerHTML = `<i class="fas fa-code"></i> <b>${item.title}</b>`;
-                div.onclick = () => openCode(item.title, item.code);
+                div.innerHTML = `<i class="fas fa-code"></i> <b>${h.title}</b>`;
+                div.onclick = () => { document.getElementById('codeBox').textContent = h.code; Prism.highlightElement(document.getElementById('codeBox')); document.getElementById('codeModal').style.display = 'flex'; };
                 list.appendChild(div);
             });
         });
-    }
-
-    function openCode(title, code) {
-        document.getElementById('codeTitle').innerText = title;
-        document.getElementById('codeBox').textContent = code;
-        Prism.highlightElement(document.getElementById('codeBox'));
-        document.getElementById('codeModal').style.display = 'flex';
     }
 
     async function toggleLike(pid, el) {
@@ -237,7 +253,6 @@
         }
     }
 
-    // UI Logic
     document.getElementById('authSubmit').onclick = async () => {
         const e = document.getElementById('regEmail').value, p = document.getElementById('regPass').value;
         try { loginMode ? await signInWithEmailAndPassword(auth,e,p) : await createUserWithEmailAndPassword(auth,e,p); } catch(err){alert(err.message)}
