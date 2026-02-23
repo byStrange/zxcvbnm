@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>AnimGram - Minimal Icons</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <style>
+        :root {
+            --bg: #000; --accent: #007AFF; --card: rgba(28, 28, 30, 0.7);
+            --border: rgba(255, 255, 255, 0.1); --text: #fff; --sub: rgba(255, 255, 255, 0.4);
+            --glass: blur(30px) saturate(200%);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; overflow: hidden; }
+
+        /* Splash Screen */
+        #splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 0.5s; }
+        .ag-logo { width: 90px; height: 90px; background: var(--accent); border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 35px; font-weight: 900; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); opacity: 0.8; } }
+
+        /* Auth */
+        #authPage { position: fixed; inset: 0; background: #000; z-index: 9000; display: none; align-items: center; justify-content: center; padding: 25px; }
+        .modal-card { width: 100%; max-width: 360px; background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid var(--border); backdrop-filter: var(--glass); text-align: center; }
+        input, textarea { width: 100%; background: #1c1c1e; border: 1px solid var(--border); padding: 15px; border-radius: 15px; color: #fff; margin-bottom: 12px; }
+        .btn { width: 100%; padding: 15px; border-radius: 15px; border: none; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn:active { transform: scale(0.95); opacity: 0.8; }
+
+        /* Main UI */
+        .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .header { padding: 60px 20px 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.8); backdrop-filter: var(--glass); z-index: 100; }
+        .logo-text { font-size: 24px; font-weight: 800; }
+
+        #mainArea { flex: 1; overflow-y: auto; padding-bottom: 100px; -webkit-overflow-scrolling: touch; }
+        .post-card { background: var(--card); border-radius: 25px; border: 1px solid var(--border); margin: 15px; overflow: hidden; backdrop-filter: var(--glass); }
+        .post-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
+        .avatar-sm { width: 32px; height: 32px; border-radius: 10px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+        
+        .content-box { width: 100%; aspect-ratio: 1/1; background: #050505; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; cursor: pointer; }
+        .post-footer { padding: 12px 15px; }
+        .btns { display: flex; gap: 20px; font-size: 22px; margin-bottom: 8px; }
+        .fa-heart.active { color: #ff3b30; }
+
+        /* Nav Bar */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(28, 28, 30, 0.8); backdrop-filter: var(--glass); display: flex; justify-content: space-around; padding: 15px 10px 35px; border-top: 1px solid var(--border); }
+        .nav-item { font-size: 24px; color: var(--sub); cursor: pointer; transition: 0.2s; }
+        .nav-item.active { color: #fff; }
+
+        /* History */
+        .h-item { display: flex; align-items: center; gap: 15px; padding: 12px; background: var(--card); border-radius: 15px; margin: 10px; border: 1px solid var(--border); cursor: pointer; }
+
+        /* Code View */
+        #codeModal { position: fixed; inset: 0; background: #000; z-index: 10000; display: none; flex-direction: column; }
+        .code-header { padding: 50px 20px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+
+        .tab { display: none; }
+        .tab.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="splash"><div class="ag-logo">AG</div></div>
+
+    <div id="authPage">
+        <div class="modal-card">
+            <h1 style="margin-top:0">AnimGram</h1>
+            <div id="regNameBox" style="display:none;"><input type="text" id="regName" placeholder="Ismingiz"></div>
+            <input type="email" id="regEmail" placeholder="Email">
+            <input type="password" id="regPass" placeholder="Parol">
+            <button class="btn" id="authSubmit">DAVOM ETISH</button>
+            <p id="switchBtn" style="color:var(--accent); margin-top:20px; font-size:13px; cursor:pointer;">Ro'yxatdan o'tish</p>
+        </div>
+    </div>
+
+    <div class="app-shell">
+        <div class="header">
+            <div class="logo-text">AnimGram</div>
+            <div id="admBadge" style="display:none; color:#ff3b30; font-size:18px;"><i class="fas fa-shield-alt"></i></div>
+        </div>
+
+        <div id="mainArea">
+            <div id="tab-reels" class="tab active">
+                <div id="feed"></div>
+            </div>
+
+            <div id="tab-history" class="tab">
+                <h3 style="padding:20px">Tarix</h3>
+                <div id="historyList"></div>
+            </div>
+
+            <div id="tab-profile" class="tab">
+                <div class="modal-card" style="margin: 50px auto;">
+                    <div id="uAvatar" style="width:70px; height:70px; background:var(--accent); border-radius:20px; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:bold;">?</div>
+                    <b id="uEmailText">User</b>
+                    <button class="btn" id="logoutBtn" style="background:#ff3b30; margin-top:20px;"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-bar">
+            <i class="fas fa-play nav-item active" data-tab="tab-reels"></i>
+            <i class="fas fa-history nav-item" data-tab="tab-history"></i>
+            <i class="fas fa-plus-circle nav-item" id="addBtn"></i>
+            <i class="fas fa-user-circle nav-item" data-tab="tab-profile"></i>
+        </div>
+    </div>
+
+    <div id="codeModal">
+        <div class="code-header">
+            <i class="fas fa-chevron-left" id="closeCodeBtn" style="font-size:24px; color:var(--accent); cursor:pointer"></i>
+            <b id="codeTitle">SOURCE</b>
+            <div style="width:24px"></div>
+        </div>
+        <div style="flex:1; overflow:auto; padding:15px;">
+            <pre><code id="codeBox" class="language-html"></code></pre>
+        </div>
+    </div>
+
+    <div id="addModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:11000; align-items:center; justify-content:center; padding:20px;">
+        <div class="modal-card">
+            <h3>Yangi Post</h3>
+            <input type="text" id="pName" placeholder="Nomi">
+            <textarea id="pCode" rows="5" placeholder="HTML/CSS kod"></textarea>
+            <button class="btn" id="publishBtn"><i class="fas fa-paper-plane"></i></button>
+            <button class="btn" style="background:none; color:var(--sub)" id="closeAddBtn"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, getDoc, setDoc, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyBqrgTztsCMFP99ZrIyOMAeqV-EiKB7wBE", 
+        authDomain: "mrgram-cbd1d.firebaseapp.com", 
+        projectId: "mrgram-cbd1d", 
+        appId: "1:1078968830234:web:3d119ea0ed3e5fbb9f84a3" 
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let me = null;
+    let loginMode = true;
+    const ADM = "admin@gmail.com";
+
+    // Auth State
+    onAuthStateChanged(auth, u => {
+        me = u;
+        document.getElementById('splash').style.opacity = '0';
+        setTimeout(() => document.getElementById('splash').style.display = 'none', 500);
+
+        if(!u) {
+            document.getElementById('authPage').style.display = 'flex';
+        } else {
+            document.getElementById('authPage').style.display = 'none';
+            document.getElementById('uEmailText').innerText = u.email;
+            document.getElementById('uAvatar').innerText = u.email[0].toUpperCase();
+            if(u.email === ADM) document.getElementById('admBadge').style.display = 'block';
+            loadFeed();
+        }
+    });
+
+    // Auth Actions
+    document.getElementById('authSubmit').onclick = async () => {
+        const e = document.getElementById('regEmail').value, p = document.getElementById('regPass').value;
+        try { 
+            loginMode ? await signInWithEmailAndPassword(auth, e, p) : await createUserWithEmailAndPassword(auth, e, p); 
+        } catch(err) { alert(err.message); }
+    };
+
+    document.getElementById('switchBtn').onclick = () => {
+        loginMode = !loginMode;
+        document.getElementById('regNameBox').style.display = loginMode ? 'none' : 'block';
+        document.getElementById('switchBtn').innerText = loginMode ? "Ro'yxatdan o'tish" : "Kirish rejimi";
+    };
+
+    // Tab Navigation
+    document.querySelectorAll('.nav-item[data-tab]').forEach(item => {
+        item.onclick = () => {
+            const target = item.getAttribute('data-tab');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(target).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            item.classList.add('active');
+            if(target === 'tab-history') renderHistory();
+        };
+    });
+
+    // Load Feed
+    async function loadFeed() {
+        onSnapshot(collection(db, "animations"), async (snap) => {
+            const feed = document.getElementById('feed');
+            const seen = JSON.parse(localStorage.getItem('seen_ids') || '[]');
+            let all = [];
+            
+            snap.forEach(d => all.push({id: d.id, ...d.data()}));
+            
+            let unseen = all.filter(p => !seen.includes(p.id));
+            let display = unseen.length > 0 ? unseen : all;
+            if(unseen.length === 0 && all.length > 0) localStorage.removeItem('seen_ids');
+
+            display.sort(() => Math.random() - 0.5);
+            feed.innerHTML = display.length ? "" : "<p style='text-align:center;padding:50px;opacity:0.5'>Hali postlar yo'q</p>";
+
+            for(let p of display) {
+                const liked = me ? (await getDoc(doc(db, "likes", `${me.uid}_${p.id}`))).exists() : false;
+                const card = document.createElement('div');
+                card.className = 'post-card';
+                card.innerHTML = `
+                    <div class="post-header">
+                        <div style="display:flex;align-items:center;gap:10px">
+                            <div class="avatar-sm">${(p.user||'U')[0].toUpperCase()}</div>
+                            <b>${p.user||'User'}</b>
+                        </div>
+                        ${me?.email === ADM ? `<i class="fas fa-trash-alt del-btn" style="color:#ff3b30; cursor:pointer"></i>` : ''}
+                    </div>
+                    <div class="content-box">${p.code}</div>
+                    <div class="post-footer">
+                        <div class="btns">
+                            <i class="fa-${liked?'solid':'regular'} fa-heart like-btn ${liked?'active':''}"></i>
+                            <i class="far fa-comment"></i>
+                        </div>
+                        <b style="font-size:13px" class="likes-count">${p.likes||0} likes</b>
+                    </div>`;
+
+                // Event Listeners for Dynamic Elements
+                card.querySelector('.content-box').onclick = () => openCode(p.id, p.name, p.code);
+                card.querySelector('.like-btn').onclick = (e) => toggleLike(p.id, e.target);
+                if(card.querySelector('.del-btn')) {
+                    card.querySelector('.del-btn').onclick = () => deletePost(p.id);
+                }
+                
+                feed.appendChild(card);
+            }
+        });
+    }
+
+    // Like Toggle
+    async function toggleLike(pid, el) {
+        if(!me) return;
+        const lid = `${me.uid}_${pid}`, lref = doc(db, "likes", lid), pref = doc(db, "animations", pid);
+        const countEl = el.closest('.post-footer').querySelector('.likes-count');
+        
+        if(el.classList.contains('fa-solid')) {
+            el.classList.replace('fa-solid', 'fa-regular'); el.classList.remove('active');
+            await deleteDoc(lref); await updateDoc(pref, { likes: increment(-1) });
+        } else {
+            el.classList.replace('fa-regular', 'fa-solid'); el.classList.add('active');
+            await setDoc(lref, { u: me.uid }); await updateDoc(pref, { likes: increment(1) });
+        }
+    }
+
+    // Code Modal Actions
+    function openCode(id, title, code) {
+        document.getElementById('codeTitle').innerText = title;
+        document.getElementById('codeBox').textContent = code;
+        Prism.highlightElement(document.getElementById('codeBox'));
+        document.getElementById('codeModal').style.display = 'flex';
+        
+        let h = JSON.parse(localStorage.getItem('ag_hist') || '[]');
+        if(!h.find(x => x.id === id)) { 
+            h.unshift({id, title, code}); 
+            localStorage.setItem('ag_hist', JSON.stringify(h.slice(0,20))); 
+        }
+        let s = JSON.parse(localStorage.getItem('seen_ids') || '[]');
+        if(!s.includes(id)) { 
+            s.push(id); 
+            localStorage.setItem('seen_ids', JSON.stringify(s)); 
+        }
+    }
+
+    function renderHistory() {
+        const l = document.getElementById('historyList'), h = JSON.parse(localStorage.getItem('ag_hist') || '[]');
+        l.innerHTML = h.length ? "" : "<p style='text-align:center;opacity:0.5'>Tarix bo'sh</p>";
+        h.forEach(i => {
+            const d = document.createElement('div'); d.className = 'h-item';
+            d.innerHTML = `<div style="width:35px;height:35px;background:#111;border-radius:5px;overflow:hidden;transform:scale(0.8)">${i.code}</div> <b>${i.title}</b>`;
+            d.onclick = () => openCode(i.id, i.title, i.code);
+            l.appendChild(d);
+        });
+    }
+
+    // CRUD & UI
+    async function deletePost(id) { if(confirm("Butunlay o'chirilsinmi?")) await deleteDoc(doc(db, "animations", id)); }
+    
+    document.getElementById('publishBtn').onclick = async () => {
+        const n = document.getElementById('pName').value, c = document.getElementById('pCode').value;
+        if(!n || !c) return;
+        await addDoc(collection(db, "animations"), { 
+            name: n, code: c, likes: 0, 
+            user: me.email.split('@')[0], 
+            time: serverTimestamp() 
+        });
+        document.getElementById('addModal').style.display = 'none';
+        document.getElementById('pName').value = '';
+        document.getElementById('pCode').value = '';
+    };
+
+    document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => location.reload());
+    document.getElementById('addBtn').onclick = () => document.getElementById('addModal').style.display = 'flex';
+    document.getElementById('closeAddBtn').onclick = () => document.getElementById('addModal').style.display = 'none';
+    document.getElementById('closeCodeBtn').onclick = () => document.getElementById('codeModal').style.display = 'none';
+
+</script>
+</body>
+</html>
