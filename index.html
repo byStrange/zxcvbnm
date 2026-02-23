@@ -31,7 +31,7 @@
         .post-card { background: var(--card); border-radius: 25px; border: 1px solid var(--border); margin: 15px; overflow: hidden; backdrop-filter: var(--glass); }
         .post-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
         .avatar-sm { width: 32px; height: 32px; border-radius: 10px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .content-box { width: 100%; aspect-ratio: 1/1; background: #050505; position: relative; overflow: hidden; }
+        .content-box { width: 100%; aspect-ratio: 1/1; background: #050505; position: relative; overflow: hidden; cursor: pointer; }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(28, 28, 30, 0.8); backdrop-filter: var(--glass); display: flex; justify-content: space-around; padding: 15px 10px 35px; border-top: 1px solid var(--border); }
         .nav-item { font-size: 24px; color: var(--sub); cursor: pointer; }
@@ -44,9 +44,8 @@
         .tab.active { display: block; }
         .h-item { display: flex; align-items: center; gap: 15px; padding: 12px; background: var(--card); border-radius: 15px; margin: 10px; border: 1px solid var(--border); cursor: pointer; }
         
-        /* Comment styling */
-        .comment-box { font-size: 13px; margin-bottom: 5px; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .comment-item { font-size: 13px; margin-bottom: 5px; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -126,7 +125,7 @@
     let loginMode = true;
     const ADM = "admin@gmail.com";
 
-    // --- Global Functions ---
+    // Global funksiya: Komment yuborish
     window.sendComment = async (postId) => {
         const input = document.getElementById(`cm_input_${postId}`);
         const text = input.value.trim();
@@ -168,7 +167,7 @@
             snap.forEach(d => {
                 const c = d.data();
                 const div = document.createElement('div');
-                div.className = 'comment-box';
+                div.className = 'comment-item';
                 div.innerHTML = `<b style="color:var(--accent)">${c.user}:</b> ${c.text}`;
                 container.appendChild(div);
             });
@@ -210,11 +209,18 @@
                         </div>
                     </div>`;
 
+                // Eventlar
                 card.querySelector('.content-box').onclick = () => addToHistoryAndOpen(p);
                 card.querySelector('.like-btn').onclick = (e) => toggleLike(p.id, e.target);
+                
+                // ALERTSIZ O'CHIRISH (Trash icon)
                 if(me?.email === ADM) {
-                    card.querySelector('.del-post').onclick = () => confirm("O'chirish?") && deleteDoc(doc(db, "animations", p.id));
+                    card.querySelector('.del-post').onclick = (e) => {
+                        e.stopPropagation();
+                        deleteDoc(doc(db, "animations", p.id)); // Alert olib tashlandi
+                    };
                 }
+                
                 feed.appendChild(card);
                 listenComments(p.id, card.querySelector(`#cm_list_${p.id}`));
             }
@@ -238,7 +244,11 @@
                 const div = document.createElement('div');
                 div.className = 'h-item';
                 div.innerHTML = `<i class="fas fa-code"></i> <b>${h.title}</b>`;
-                div.onclick = () => { document.getElementById('codeBox').textContent = h.code; Prism.highlightElement(document.getElementById('codeBox')); document.getElementById('codeModal').style.display = 'flex'; };
+                div.onclick = () => { 
+                    document.getElementById('codeBox').textContent = h.code; 
+                    Prism.highlightElement(document.getElementById('codeBox')); 
+                    document.getElementById('codeModal').style.display = 'flex'; 
+                };
                 list.appendChild(div);
             });
         });
@@ -263,6 +273,7 @@
         if(n && c) {
             await addDoc(collection(db, "animations"), { name:n, code:c, likes:0, user:me.email.split('@')[0], time:serverTimestamp() });
             document.getElementById('addModal').style.display = 'none';
+            document.getElementById('pName').value = ""; document.getElementById('pCode').value = "";
         }
     };
 
