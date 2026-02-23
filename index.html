@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AnimGram - Community Edition</title>
+    <title>AnimGram Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
@@ -16,36 +16,32 @@
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; overflow: hidden; }
 
         #splash { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; transition: 0.5s; }
-        .ag-logo { width: 90px; height: 90px; background: var(--accent); border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 35px; font-weight: 900; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); opacity: 0.8; } }
+        .ag-logo { width: 80px; height: 80px; background: var(--accent); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
         #authPage { position: fixed; inset: 0; background: #000; z-index: 9000; display: none; align-items: center; justify-content: center; padding: 25px; }
         .modal-card { width: 100%; max-width: 360px; background: var(--card); padding: 30px; border-radius: 30px; border: 1px solid var(--border); backdrop-filter: var(--glass); text-align: center; }
         input, textarea { width: 100%; background: #1c1c1e; border: 1px solid var(--border); padding: 12px; border-radius: 12px; color: #fff; margin-bottom: 10px; }
-        .btn { width: 100%; padding: 15px; border-radius: 15px; border: none; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn { width: 100%; padding: 15px; border-radius: 15px; border: none; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; }
 
         .app-shell { width: 100%; height: 100%; display: flex; flex-direction: column; }
-        .header { padding: 60px 20px 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.8); backdrop-filter: var(--glass); z-index: 100; }
+        .header { padding: 50px 20px 15px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.8); backdrop-filter: var(--glass); z-index: 100; }
         
-        #mainArea { flex: 1; overflow-y: auto; padding-bottom: 100px; }
-        .post-card { background: var(--card); border-radius: 25px; border: 1px solid var(--border); margin: 15px; overflow: hidden; backdrop-filter: var(--glass); }
+        #mainArea { flex: 1; overflow-y: auto; padding-bottom: 100px; scroll-behavior: smooth; }
+        .post-card { background: var(--card); border-radius: 25px; border: 1px solid var(--border); margin: 15px; overflow: hidden; }
         .post-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
         .avatar-sm { width: 32px; height: 32px; border-radius: 10px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .content-box { width: 100%; aspect-ratio: 1/1; background: #050505; position: relative; overflow: hidden; cursor: pointer; }
+        .content-box { width: 100%; aspect-ratio: 1/1; background: #050505; position: relative; overflow: hidden; }
 
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(28, 28, 30, 0.8); backdrop-filter: var(--glass); display: flex; justify-content: space-around; padding: 15px 10px 35px; border-top: 1px solid var(--border); }
         .nav-item { font-size: 24px; color: var(--sub); cursor: pointer; }
         .nav-item.active { color: #fff; }
 
+        .comment-item { font-size: 13px; margin-bottom: 5px; padding: 2px 0; }
         #codeModal { position: fixed; inset: 0; background: #000; z-index: 10000; display: none; flex-direction: column; }
-        .code-header { padding: 50px 20px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        
         .tab { display: none; }
         .tab.active { display: block; }
-        .h-item { display: flex; align-items: center; gap: 15px; padding: 12px; background: var(--card); border-radius: 15px; margin: 10px; border: 1px solid var(--border); cursor: pointer; }
-        
-        .comment-item { font-size: 13px; margin-bottom: 5px; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .h-item { display: flex; align-items: center; gap: 15px; padding: 12px; background: var(--card); border-radius: 15px; margin: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -64,7 +60,7 @@
 
     <div class="app-shell">
         <div class="header">
-            <div style="font-size:24px; font-weight:800">AnimGram</div>
+            <div style="font-size:22px; font-weight:800">AnimGram</div>
             <div id="admBadge" style="display:none; color:#ff3b30;"><i class="fas fa-shield-alt"></i></div>
         </div>
         <div id="mainArea">
@@ -87,9 +83,9 @@
     </div>
 
     <div id="codeModal">
-        <div class="code-header">
+        <div class="code-header" style="padding:50px 20px 15px; display:flex; justify-content:space-between; align-items:center;">
             <i class="fas fa-chevron-left" id="closeCodeBtn" style="font-size:24px; color:var(--accent); cursor:pointer"></i>
-            <b>SOURCE</b>
+            <b>KOD</b>
             <div style="width:24px"></div>
         </div>
         <div style="flex:1; overflow:auto; padding:15px;"><pre><code id="codeBox" class="language-html"></code></pre></div>
@@ -100,7 +96,7 @@
             <h3>Yangi Post</h3>
             <input type="text" id="pName" placeholder="Nomi">
             <textarea id="pCode" rows="8" placeholder="HTML/CSS kod"></textarea>
-            <button class="btn" id="publishBtn">PUBLISH</button>
+            <button class="btn" id="publishBtn">YUKLASH</button>
             <button class="btn" style="background:none;" id="closeAddBtn">Yopish</button>
         </div>
     </div>
@@ -125,7 +121,7 @@
     let loginMode = true;
     const ADM = "admin@gmail.com";
 
-    // Global funksiya: Komment yuborish
+    // Global comment function
     window.sendComment = async (postId) => {
         const input = document.getElementById(`cm_input_${postId}`);
         const text = input.value.trim();
@@ -135,6 +131,28 @@
         });
         input.value = "";
     };
+
+    // --- Scoping Engine (Bu qism animatsiyalar qotmasligini ta'minlaydi) ---
+    function scopeCSS(id, code) {
+        return code.replace(/<style>([\s\S]*?)<\/style>/gi, (m, css) => {
+            // Animatsiya nomlarini unikal qilamiz: @keyframes rotate -> @keyframes s_abc_rotate
+            let scopedCss = css.replace(/@keyframes\s+([\w-]+)/g, (m, name) => `@keyframes ${id}_${name}`);
+            
+            // animation: rotate 2s -> animation: s_abc_rotate 2s
+            scopedCss = scopedCss.replace(/animation(-name)?\s*:\s*([^;}\s,]+)/g, (m, prop, name) => {
+                // Agar name 'none' yoki 'initial' bo'lmasa, ID ni qo'shamiz
+                const forbidden = ['none', 'initial', 'inherit', 'unset'];
+                return forbidden.includes(name) ? m : `animation${prop ? prop : ''}: ${id}_${name}`;
+            });
+
+            // Selektorlarni scope qilish: .box -> #s_abc .box
+            const finalCss = scopedCss.replace(/([^\r\n,{}]+)(?=[^{}]*{)/g, s => {
+                if (s.includes('@') || s.includes('%') || s.trim() === 'from' || s.trim() === 'to') return s;
+                return `#${id} ${s.trim()}`;
+            });
+            return `<style>${finalCss}</style>`;
+        });
+    }
 
     onAuthStateChanged(auth, u => {
         me = u;
@@ -149,16 +167,6 @@
             loadFeed();
         }
     });
-
-    function scopeCSS(id, code) {
-        return code.replace(/<style>([\s\S]*?)<\/style>/gi, (m, css) => {
-            const scoped = css.replace(/([^\r\n,{}]+)(?=[^{}]*{)/g, s => {
-                if (s.includes('@') || s.includes('%')) return s;
-                return `#${id} ${s.trim()}`;
-            });
-            return `<style>${scoped}</style>`;
-        });
-    }
 
     function listenComments(postId, container) {
         const q = query(collection(db, "animations", postId, "comments"), orderBy("time", "asc"));
@@ -196,31 +204,24 @@
                         ${me?.email === ADM ? `<i class="fas fa-trash-alt del-post" style="color:#ff3b30;cursor:pointer"></i>` : ''}
                     </div>
                     <div class="content-box" id="${sid}">${scopeCSS(sid, p.code)}</div>
-                    <div class="post-footer">
-                        <div class="btns">
-                            <i class="fa-${liked?'solid':'regular'} fa-heart like-btn ${liked?'active':''}"></i>
+                    <div class="post-footer" style="padding:15px">
+                        <div style="display:flex; gap:15px; font-size:20px; margin-bottom:5px;">
+                            <i class="fa-${liked?'solid':'regular'} fa-heart like-btn ${liked?'active':''}" style="cursor:pointer; color:${liked?'#ff3b30':''}"></i>
                             <i class="far fa-comment"></i>
                         </div>
                         <b style="font-size:12px">${p.likes||0} likes</b>
-                        <div id="cm_list_${p.id}" style="max-height:100px; overflow-y:auto; margin:10px 0; border-top:1px solid var(--border); padding-top:10px;"></div>
+                        <div id="cm_list_${p.id}" style="max-height:80px; overflow-y:auto; margin:10px 0; border-top:1px solid var(--border); padding-top:10px;"></div>
                         <div style="display:flex; gap:8px;">
-                            <input type="text" id="cm_input_${p.id}" placeholder="Izoh..." style="margin:0; flex:1; padding:10px;">
-                            <button class="btn" style="width:auto; padding:0 15px;" onclick="sendComment('${p.id}')"><i class="fas fa-paper-plane"></i></button>
+                            <input type="text" id="cm_input_${p.id}" placeholder="Izoh..." style="margin:0; flex:1; padding:8px; font-size:12px;">
+                            <button class="btn" style="width:auto; padding:0 12px;" onclick="sendComment('${p.id}')"><i class="fas fa-paper-plane"></i></button>
                         </div>
                     </div>`;
 
-                // Eventlar
                 card.querySelector('.content-box').onclick = () => addToHistoryAndOpen(p);
                 card.querySelector('.like-btn').onclick = (e) => toggleLike(p.id, e.target);
-                
-                // ALERTSIZ O'CHIRISH (Trash icon)
                 if(me?.email === ADM) {
-                    card.querySelector('.del-post').onclick = (e) => {
-                        e.stopPropagation();
-                        deleteDoc(doc(db, "animations", p.id)); // Alert olib tashlandi
-                    };
+                    card.querySelector('.del-post').onclick = () => deleteDoc(doc(db, "animations", p.id));
                 }
-                
                 feed.appendChild(card);
                 listenComments(p.id, card.querySelector(`#cm_list_${p.id}`));
             }
@@ -290,7 +291,7 @@
     document.getElementById('closeAddBtn').onclick = () => document.getElementById('addModal').style.display = 'none';
     document.getElementById('closeCodeBtn').onclick = () => document.getElementById('codeModal').style.display = 'none';
     document.getElementById('logoutBtn').onclick = () => signOut(auth).then(()=>location.reload());
-    document.getElementById('switchBtn').onclick = () => { loginMode = !loginMode; document.getElementById('switchBtn').innerText = loginMode ? "Ro'yxatdan o'tish" : "Kirish rejimi"; };
+    document.getElementById('switchBtn').onclick = () => { loginMode = !loginMode; document.getElementById('switchBtn').innerText = loginMode ? "Ro'yxatdan o'tish" : "Kirish"; };
 </script>
 </body>
 </html>
