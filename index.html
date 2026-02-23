@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>AnimGram - Minimal Icons</title>
+    <title>AnimGram - Eng yangilari tepada</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     
@@ -150,7 +151,6 @@
     let loginMode = true;
     const ADM = "admin@gmail.com";
 
-    // Auth State
     onAuthStateChanged(auth, u => {
         me = u;
         document.getElementById('splash').style.opacity = '0';
@@ -167,7 +167,6 @@
         }
     });
 
-    // Auth Actions
     document.getElementById('authSubmit').onclick = async () => {
         const e = document.getElementById('regEmail').value, p = document.getElementById('regPass').value;
         try { 
@@ -181,7 +180,6 @@
         document.getElementById('switchBtn').innerText = loginMode ? "Ro'yxatdan o'tish" : "Kirish rejimi";
     };
 
-    // Tab Navigation
     document.querySelectorAll('.nav-item[data-tab]').forEach(item => {
         item.onclick = () => {
             const target = item.getAttribute('data-tab');
@@ -193,23 +191,26 @@
         };
     });
 
-    // Load Feed
+    // TO'LIQ YANGILANGAN LOAD FEED: Eskilari o'chmaydi, yangilari tepada
     async function loadFeed() {
         onSnapshot(collection(db, "animations"), async (snap) => {
             const feed = document.getElementById('feed');
-            const seen = JSON.parse(localStorage.getItem('seen_ids') || '[]');
-            let all = [];
+            let allPosts = [];
             
-            snap.forEach(d => all.push({id: d.id, ...d.data()}));
-            
-            let unseen = all.filter(p => !seen.includes(p.id));
-            let display = unseen.length > 0 ? unseen : all;
-            if(unseen.length === 0 && all.length > 0) localStorage.removeItem('seen_ids');
+            snap.forEach(d => {
+                allPosts.push({id: d.id, ...d.data()});
+            });
 
-            display.sort(() => Math.random() - 0.5);
-            feed.innerHTML = display.length ? "" : "<p style='text-align:center;padding:50px;opacity:0.5'>Hali postlar yo'q</p>";
+            // Saralash: Eng yangisi tepada
+            allPosts.sort((a, b) => {
+                const tA = a.time?.toMillis ? a.time.toMillis() : Date.now();
+                const tB = b.time?.toMillis ? b.time.toMillis() : Date.now();
+                return tB - tA;
+            });
 
-            for(let p of display) {
+            feed.innerHTML = allPosts.length ? "" : "<p style='text-align:center;padding:50px;opacity:0.5'>Hali postlar yo'q</p>";
+
+            for(let p of allPosts) {
                 const liked = me ? (await getDoc(doc(db, "likes", `${me.uid}_${p.id}`))).exists() : false;
                 const card = document.createElement('div');
                 card.className = 'post-card';
@@ -230,7 +231,6 @@
                         <b style="font-size:13px" class="likes-count">${p.likes||0} likes</b>
                     </div>`;
 
-                // Event Listeners for Dynamic Elements
                 card.querySelector('.content-box').onclick = () => openCode(p.id, p.name, p.code);
                 card.querySelector('.like-btn').onclick = (e) => toggleLike(p.id, e.target);
                 if(card.querySelector('.del-btn')) {
@@ -242,12 +242,9 @@
         });
     }
 
-    // Like Toggle
     async function toggleLike(pid, el) {
         if(!me) return;
         const lid = `${me.uid}_${pid}`, lref = doc(db, "likes", lid), pref = doc(db, "animations", pid);
-        const countEl = el.closest('.post-footer').querySelector('.likes-count');
-        
         if(el.classList.contains('fa-solid')) {
             el.classList.replace('fa-solid', 'fa-regular'); el.classList.remove('active');
             await deleteDoc(lref); await updateDoc(pref, { likes: increment(-1) });
@@ -257,7 +254,6 @@
         }
     }
 
-    // Code Modal Actions
     function openCode(id, title, code) {
         document.getElementById('codeTitle').innerText = title;
         document.getElementById('codeBox').textContent = code;
@@ -268,11 +264,6 @@
         if(!h.find(x => x.id === id)) { 
             h.unshift({id, title, code}); 
             localStorage.setItem('ag_hist', JSON.stringify(h.slice(0,20))); 
-        }
-        let s = JSON.parse(localStorage.getItem('seen_ids') || '[]');
-        if(!s.includes(id)) { 
-            s.push(id); 
-            localStorage.setItem('seen_ids', JSON.stringify(s)); 
         }
     }
 
@@ -287,7 +278,6 @@
         });
     }
 
-    // CRUD & UI
     async function deletePost(id) { if(confirm("Butunlay o'chirilsinmi?")) await deleteDoc(doc(db, "animations", id)); }
     
     document.getElementById('publishBtn').onclick = async () => {
